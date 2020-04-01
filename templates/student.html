@@ -39,11 +39,13 @@
                     // Store
                     sessionStorage.setItem("taskSid", initialTaskSid);
 
-                    checkTaskActivity(initialTaskSid);
                     //display video sections 
                     start_lesson_button = document.getElementById('videosection');
                     console.log('should be hiding the start lesson button now')
                     start_lesson_button.style.display = "block";   
+
+                    checkTaskActivity(initialTaskSid);
+
                 },
                 error: function(error) {
                     console.log(error);
@@ -152,19 +154,23 @@
             */
             console.log(initialTaskSid)
             checkTaskSid =  sessionStorage.getItem("taskSid");
-            worker.tasks.fetch(checkTaskSid,
-                function(error, task) {
-                    if(error) {
-                        console.log(error.code);
-                        console.log(error.message);
-                        return;
-                    }
-                    console.log(JSON.stringify(task.attributes));
-                    console.log(task)
+            if(checkTaskSid){
+                worker.tasks.fetch(checkTaskSid,
+                    function(error, task) {
+                        if(error) {
+                            //task doesnot exist in Twilio, so remove from our storage
+                            sessionStorage.clear();
+                            console.log(error.code);
+                            console.log(error.message);
+                            return;
+                        }
+                        console.log(JSON.stringify(task.attributes));
+                        console.log(task)
 
-                    //when assigned to reserved/pending then need to run 370 from agent.html to get worker details -- fuck
-                }
-            );
+                        //when assigned to reserved/pending then need to run 370 from agent.html to get worker details -- fuck
+                    }
+                );
+            }
             console.log('is interval working?')
 
 

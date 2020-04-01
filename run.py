@@ -14,14 +14,14 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Your Account Sid and Auth Token from twilio.com/user/account
 account_sid = "ACf15ddc5bc9a07dee31e1f4e79d92e411"
 auth_token  = "aa6457976b61becc24cbf586352f1f95"
-auth_token = "714a4405dddcacb8368bd083dc11d5c7"
+
 workspace_sid = "WS8acb2feb114eebf1ca9d6697dc9cc27e"
 workflow_sid = "WW8b5df83260c846f8904b368ffe9dcfe5"
 task_queue_sid = "WQ1b7d7243fa2ee3bdf6c6a87aedb45ebf"
 
 #test
-#account_sid = "ACec261d09456c5db504d4ad4945b9896b"
-#auth_token  = "6e7cd4a5a1a3323675ed895c7893465d"
+#account_sid = "SK44117cae0af7e1b95ba5f25e9d36d60b"
+#auth_token  = "AFOHa42tZRiNmSVeaE7dxotxjmv0AJc6"
 
 client = Client(account_sid, auth_token)
 

@@ -4,10 +4,14 @@
     <title>Customer Care - Voice Agent Screen</title>
     <link rel="stylesheet" href="//media.twiliocdn.com/taskrouter/quickstart/agent.css"/>
     <script src="//media.twiliocdn.com/taskrouter/js/v1.14/taskrouter.min.js"></script>
+    <!--<script src="//SK44117cae0af7e1b95ba5f25e9d36d60b:AFOHa42tZRiNmSVeaE7dxotxjmv0AJc6@media.twiliocdn.com/taskrouter/js/v1.14/taskrouter.min.js"></script>-->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script type="text/javascript">
         var initialTaskSid;
         window.onload = function() {
+            videoclick("zoom", "https://berlitz-latam.zoom.us/j/5786229231");
+            videoclick("newrow", "https://smart.newrow.com/#/room/gmn-082");
+
             //sessionStorage.clear();
             // Initialize TaskRouter.js on page load using window.workerToken -
             // a Twilio Capability token that was set from rendering the template with agents endpoint
@@ -36,6 +40,10 @@
                     sessionStorage.setItem("taskSid", initialTaskSid);
 
                     checkTaskActivity(initialTaskSid);
+                    //display video sections 
+                    start_lesson_button = document.getElementById('videosection');
+                    console.log('should be hiding the start lesson button now')
+                    start_lesson_button.style.display = "block";   
                 },
                 error: function(error) {
                     console.log(error);
@@ -45,7 +53,8 @@
                 } // end if
 
             }
-            
+            //sessionStorage.clear()
+            console.log('are we in storage: ' + sessionStorage.getItem("taskSid"))
                 if (sessionStorage.getItem("taskSid")){
                     console.log('should be running')
                     var meh = checkTaskActivity
@@ -161,10 +170,31 @@
 
 
         }
+        function videoclick(classId, videolink){
+            console.log("try to set video buttons");
+            //turn button on
+            video_button = document.getElementById(classId);
+            console.log(video_button)
+            video_button.style.display = "inline-block";
+            video_button.onclick = function(){
+                console.log('button has been clicked, time to open video link to:');
+                console.log(videolink);
+                window.open(videolink)
+                
+            }            
+        }
+        
 
 
             
      </script>
+    <style type="text/css" media="screen">
+        .video, .start-zoom, .start-newrow, .start-agora {display:none;}
+        
+        
+        /* Add style rules here */
+        
+    </style>     
 </head>
 <body>
 <div class="content">
@@ -183,7 +213,11 @@
         <!--<button class="change-activity" data-next-activity="Busy">Start Lesson</button>-->
         <button id="ct" class="accept-reservation" data-next-activity="Available">Join a session Now</button>
         <!--<button id="dafuq" class="complete-task" data-next-activity="Available">Lesson Completed</button>-->
-
+        <section class="video" id="videosection">
+            <p>Choose a video provider</p>
+            <button id="zoom" class="start-zoom" data-next-activity="Busy">Start Zoom</button>
+            <button id="newrow" class="start-newrow" data-next-activity="Busy">Start Newrow</button>
+        </section>        
     </section>
     
     <section class="agent-activity reserved">

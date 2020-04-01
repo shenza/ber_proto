@@ -26,6 +26,19 @@
                 agentActivityChanged(worker.activityName);
                 logger("Successfully registered as: " + worker.friendlyName)
                 logger("Current activity is: " + worker.activityName);
+
+
+                //displays the instructor name
+                var elements = document.getElementsByClassName('instructor_name');
+                var i = elements.length;
+                console.log(elements)
+                while (i--) {
+                    elements[i].innerHTML = worker.friendlyName;
+                    console.log(elements[i])
+                }
+
+
+
                 console.log(worker.taskSid)
                 //not sure if this is need here, but this runs for almost everything
                 //complete_task(worker, currentReservedTask);
@@ -47,36 +60,6 @@
                 }
                 console.log('dddddddddddddd');
                 console.log(zoom)
-                /*
-                try{
-                    //console.log(worker.attributes.ZOOM)
-                    zoom = worker.attributes.ZOOM
-                }catch (error) {
-                    console.log('no zoom attribute');
-                }
-                console.log(zoom)
-                 
-                try{
-                    console.log(worker.attributes.Newrow)
-                    newrow = worker.attributes.Newrow
-                }catch (error) {
-                    console.log('no newrow attribute');
-                }
-
-                try{
-                    console.log(worker.attributes.Agora)
-                    agora = worker.attributes.Agora
-                }catch (error) {
-                    console.log('no agora attribute');
-                }
-
-                try{
-                    console.log(worker.attributes.about)
-                    about = worker.attributes.Agora 
-                }catch (error) {
-                    console.log('no about attribute');
-                }
-                */
                 console.log(worker.sid)             // 'WKxxx'
       // 'Worker 1'
       // 'Reserved'
@@ -109,6 +92,10 @@
                 document.getElementById("student_language").innerHTML = reservation.task.attributes.language ;
                 document.getElementById("student_name").innerHTML = reservation.task.attributes.name ;
                 acceptReservation(reservation);
+                //hide online status
+                //console.log(document.getElementsByClassName("agent-activity Available"));
+                //document.getElementsByClassName("agent-activity Available").style.display = "none";
+                document.getElementById("available_1").style.display = "none";
                 /*
                 //this stuff works
                 var params = {"Priority":"15"};
@@ -143,6 +130,8 @@ worker.updateTask(reservation.taskSid, params,
 
             worker.on("reservation.timeout", function(reservation) {
                 logger("Reservation " + reservation.sid + " timed out!");
+                //display online status
+                //document.getElementById("available_1").style.display = "none";     
             });
 
             worker.on("reservation.canceled", function(reservation) {
@@ -405,31 +394,79 @@ worker.updateTask(reservation.taskSid, params,
 
         };
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;1,200;1,300;1,400;1,500&display=swap" rel="stylesheet">
     <style type="text/css" media="screen">
+
+        html{background-color: #E5EDFD;}
+
+        html * { 
+            
+            font-size: 1em !important;
+            color: #1D1D1D !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+        }
+        
+
         .video, .start-zoom, .start-newrow, .start-agora {display:none;}
         
-        
-        /* Add style rules here */
-        
+        section.agent-activity {
+            line-height: normal;
+            background-color: white;
+        }     
+        section.agent-activity button {
+            background: #643BA2;
+            color:#E5EDFD !important;
+            height: auto;
+            font-weight: bold;
+            
+        }
+        section.header {
+            line-height: 3 !important;
+            background-color: white;
+            width: auto;
+            text-align: center;
+        }
+
+        .header-image{
+            width:30%;
+            float: left;
+        }
+
     </style>
 </head>
 <body>
+
+<section class="header"  style="line-height: 5 !important;">
+    <p class="header">
+        <img src ="//router-prototype.s3.eu-central-1.amazonaws.com/images/berlitz_logo.jpg.jpg" alt=" Berlitz" class="header-image" >
+        <span>Lesson Router</span>    
+</p>
+</section> 
 <div class="content">
-    <section class="agent-activity Available"  style="line-height: 1 !important;">
-        <p class="activity">Current Online, </br> waiting for students</p>
+     <section id="available_1" class="agent-activity Available"  style="line-height: 1 !important;">
+        <p class="activity">Instructor: <span class="instructor_name"></span></p>
+        <p class="activity">Status: <span style="color: #27E217 !important;">Connected</span>, Waiting</p>      
         <button class="change-activity" data-next-activity="Offline">Go Offline</button>
     </section>
     <section class="agent-activity Offline">
-        <p class="activity"><span>Currently Offline</span></p>
-        <button class="change-activity" data-next-activity="Available">Go Online</button>
+        <p class="activity">Instructor: <span class="instructor_name"></span></p>
+        <p class="activity">Status: <span style="color: #FA0505 !important;">Offline</span></p>
+        <button class="change-activity" data-next-activity="Available">Start</button>
     </section>
+<!--    
+    <section class="agent-activity Offline">
+        <p class="activity">Instructor: <span class="instructor_name"></span></p>
+        <p class="activity">Status: <span style="color: #FA0505 !important;">Offline</span></p>
+        <button class="change-activity" data-next-activity="Available">Start</button>
+    </section>  
+-->
     <section class="agent-activity Busy"  style="line-height: 1 !important;">
-        <p class="activity"><span>Lesson Connected</span></p>
-        <p>lesson: <span id="student_level"></span> - <span id="student_language"></span></p>
-        <p>Student Name: <span id="student_name"></span></p>
+        <p class="activity"><span>Lesson Connected!!</span></p>
+        <p>Lesson: <span id="student_level"></span> - <span id="student_language"></span></p>
+        <p>Student: <span id="student_name"></span></p>
         <!--<button class="change-activity" data-next-activity="Busy">Start Lesson</button>-->
         <button id="accept_res" class="accept-reservation" data-next-activity="Busy">Start Lesson</button>
-        <button id="dafuq" class="complete-task" data-next-activity="Available">Lesson Completed</button>
+        <button id="dafuq" class="complete-task" data-next-activity="Available">Complete Lesson</button>
         <section class="video" id="videosection">
             <p>Choose a video provider</p>
             <button id="zoom" class="start-zoom" data-next-activity="Busy">Start Zoom</button>

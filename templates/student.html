@@ -195,14 +195,38 @@
             
      </script>
     <style type="text/css" media="screen">
+        html{background-color: #E5EDFD;}
+
+        html * { 
+            
+            font-size: 1em !important;
+            color: #1D1D1D !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+        }
         .video, .start-zoom, .start-newrow, .start-agora {display:none;}
         
         
-        /* Add style rules here */
+        section.header {
+            line-height: 3 !important;
+            background-color: white;
+            width: auto;
+            text-align: center;
+        }
+
+        .header-image{
+            width:30%;
+            float: left;
+        }
         
     </style>     
 </head>
 <body>
+<section class="header"  style="line-height: 5 !important;">
+    <p class="header">
+        <img src ="//router-prototype.s3.eu-central-1.amazonaws.com/images/berlitz_logo.jpg.jpg" alt=" Berlitz" class="header-image" >
+        <span>Lesson Router</span>    
+</p>
+</section>     
 <div class="content">
     <section class="agent-activity Available"  style="line-height: 1 !important;">
         <p class="activity">Current Online, </br> waiting for students</p>

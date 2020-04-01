@@ -14,7 +14,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Your Account Sid and Auth Token from twilio.com/user/account
 account_sid = "ACf15ddc5bc9a07dee31e1f4e79d92e411"
 auth_token  = "aa6457976b61becc24cbf586352f1f95"
-
+auth_token = "714a4405dddcacb8368bd083dc11d5c7"
 workspace_sid = "WS8acb2feb114eebf1ca9d6697dc9cc27e"
 workflow_sid = "WW8b5df83260c846f8904b368ffe9dcfe5"
 task_queue_sid = "WQ1b7d7243fa2ee3bdf6c6a87aedb45ebf"
@@ -158,6 +158,16 @@ def generate_view2():
    
     return r
 
+
+
+
+@app.route("/health", methods=['GET', 'POST'])
+#@cross_origin(origin='*')
+def generate_health_check():
+    r = make_response(render_template('student.html'))
+    r.headers.set('Access-Control-Allow-Origin', "*'")
+   
+    return r
 if __name__ == "__main__":
     #logging.getLogger('flask_cors').level = logging.DEBUG
     app.run(debug=True)

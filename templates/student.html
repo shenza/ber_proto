@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Care - Voice Agent Screen</title>
+    <link rel="stylesheet" href="//media.twiliocdn.com/taskrouter/quickstart/agent.css"/>
+    <script src="//media.twiliocdn.com/taskrouter/js/v1.14/taskrouter.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        var initialTaskSid;
+        window.onload = function() {
+            //sessionStorage.clear();
+            // Initialize TaskRouter.js on page load using window.workerToken -
+            // a Twilio Capability token that was set from rendering the template with agents endpoint
+            logger("Initializing...");
+            //window.worker = new Twilio.TaskRouter.Worker("{{ worker_token }}");
+            window.worker = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
+            //window.workspace = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
+            //try to get the task that the current worker has - this is done incase of page refresh
+            //or some issues to force cancel/complete previous task
+            console.log(window.worker);
+
+            document.getElementById('ct').onclick = function(){
+                if(! sessionStorage.getItem("taskSid") ){
+                data = {"name":"{{name}}", "level":"{{level}}", "language":"{{language}}", "uuid":"2345443"}
+                console.log('task has been completed');
+                $.ajax({
+                url: '/create_task',
+                data: JSON.stringify(data),
+                contentType: 'application/json;charset=UTF-8',
+                type: 'POST',
+                success: function(response) {
+                    console.log(response);
+                    console.log(response.payload.taskSid)
+                    initialTaskSid = response.payload.taskSid;
+                    // Store
+                    sessionStorage.setItem("taskSid", initialTaskSid);
+
+                    checkTaskActivity(initialTaskSid);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+                });
+
+                } // end if
+
+            }
+            
+                if (sessionStorage.getItem("taskSid")){
+                    console.log('should be running')
+                    var meh = checkTaskActivity
+                    setInterval(meh, 5000)
+                }
+            
+                //setInterval(function(){ console.log("Hello"); }, 5000);
+            /*
+            // Initialize TaskRouter.js on page load using window.workerToken -
+            // a Twilio Capability token that was set from rendering the template with agents endpoint
+            logger("Initializing...");
+            window.worker = new Twilio.TaskRouter.Worker("{{ worker_token }}");
+            //window.workspace = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
+            //try to get the task that the current worker has - this is done incase of page refresh
+            //or some issues to force cancel/complete previous task
+            current_worker_sid = "{{current_worker_sid}}";
+            console.log(window.worker);
+            console.log(current_worker_sid)
+            console.log('above');
+            var queryParams = {"ReservationStatus":"accepted", "WorkerSid":current_worker_sid};
+            worker.fetchReservations(
+                function(error, reservations) {
+                    if(error) {
+                        console.log(error.code);
+                        console.log(error.message);
+                        return;
+                    }
+                    console.log(reservations)
+                    var data = reservations.data;
+                    for(i=0; i<data.length; i++) {
+                        console.log(data[i].sid);
+                        
+                    }
+                    console.log('ggggggggggggggggggggggg')
+                    console.log(data)
+                    try{
+                        currentReservedTask = reservations.data[0].taskSid
+                        currentTaskAttr = reservations.data[0].task.attributes
+                        document.getElementById("student_level").innerHTML = currentTaskAttr.level ;
+                        document.getElementById("student_language").innerHTML = currentTaskAttr.language ;
+                        document.getElementById("student_name").innerHTML = currentTaskAttr.name ;
+                    }catch (error) {
+                        console.log('no existing tasks')
+                    }
+                    
+                    console.log(currentReservedTask)
+                    worker.com
+                    complete_task(worker, currentReservedTask);
+                },
+                queryParams
+            );
+            */
+        };
+        function logger(message) {
+            var log = document.getElementById('log');
+            log.value += "\n> " + message;
+            log.scrollTop = log.scrollHeight;
+        }
+        function checkTaskActivity(initialTaskSid=sessionStorage.getItem("taskSid")){
+            current_worker_sid = "{{current_worker_sid}}";
+            /*
+            console.log(current_worker_sid)
+            console.log('above');
+            var queryParams = {"ReservationStatus":"accepted", "TaskSid":initialTaskSid};
+            queryParams = {"ReservationStatus":"accepted", "TaskSid":initialTaskSid};
+            var attributes = "{\"uuid\":\"2345443\"}";
+            queryParams = {"Attributes":attributes};
+            worker.tasks.fetch(
+                function(error, taskList) {
+                    if(error) {
+                        console.log(error.code);
+                        console.log(error.message);
+                        return;
+                    }
+                    var data = taskList.data;
+                    var cancelAttrs = {"AssignmentStatus":"canceled", "Reason":"waiting"}
+                    for(i=0; i<data.length; i++) {
+                        var task = data[i];
+                        
+                    //    task.update("WTxxx", cancelAttrs,
+                    //    function(error, task) {
+                    //        if(error) {
+                    //        console.log(error.code);
+                    //        console.log(error.message);
+                    //        return;
+                    //        }
+                    //        console.log("Attributes: "+JSON.stringify(task.attributes));
+                    //    }
+                    //    );
+                        
+                        console.log(task)
+                    }
+                }
+            );
+            */
+            console.log(initialTaskSid)
+            checkTaskSid =  sessionStorage.getItem("taskSid");
+            worker.tasks.fetch(checkTaskSid,
+                function(error, task) {
+                    if(error) {
+                        console.log(error.code);
+                        console.log(error.message);
+                        return;
+                    }
+                    console.log(JSON.stringify(task.attributes));
+                    console.log(task)
+
+                    //when assigned to reserved/pending then need to run 370 from agent.html to get worker details -- fuck
+                }
+            );
+            console.log('is interval working?')
+
+
+
+        }
+
+
+            
+     </script>
+</head>
+<body>
+<div class="content">
+    <section class="agent-activity Available"  style="line-height: 1 !important;">
+        <p class="activity">Current Online, </br> waiting for students</p>
+        <button class="change-activity" data-next-activity="Offline">Go Offline</button>
+    </section>
+    <section class="agent-activity Offline">
+        <p class="activity"><span>Currently Offline</span></p>
+        <button class="change-activity" data-next-activity="Available">Go Online</button>
+    </section>
+    <section class="agent-activity Busy"  style="line-height: 1 !important; display:block !important;">
+        <p class="activity"><span>Connect with a Berlitz Instructor</span></p>
+        <p>lesson: <span id="student_level">{{level}}</span> - <span id="student_language">{{language}}</span></p>
+        <p>Student Name: <span id="student_name">{{name}}</span></p>
+        <!--<button class="change-activity" data-next-activity="Busy">Start Lesson</button>-->
+        <button id="ct" class="accept-reservation" data-next-activity="Available">Join a session Now</button>
+        <!--<button id="dafuq" class="complete-task" data-next-activity="Available">Lesson Completed</button>-->
+
+    </section>
+    
+    <section class="agent-activity reserved">
+        <p class="activity">Reserved</p>
+    </section>
+    <section class="agent-activity busy">
+        <p class="activity">Busy</p>
+    </section>
+    <section class="agent-activity wrapup">
+        <p class="activity">Wrap-Up</p>
+        <button class="change-activity" data-next-activity="Available">Go Online</button>
+        <button class="change-activity" data-next-activity="Offline">Go Offline</button>
+    </section>
+    <section class="log">
+      <textarea id="log" readonly="true"></textarea>
+    </section>
+</div>
+</body>
+</html>

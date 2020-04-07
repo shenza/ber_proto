@@ -57,6 +57,38 @@ def create_task():
     resp = Response(json.dumps({'success':True, "payload":data}), status=200, mimetype='application/json')
     return resp
 
+@app.route("/check_reservation", methods=['GET', 'POST'])
+def check_reservation():
+    """ get list of current reservations - used to get the worker sid """
+    #https://www.twilio.com/docs/taskrouter/api/reservations#reservations-list-resource
+    #GET /v1/Workspaces/{WorkspaceSid}/Tasks/{TaskSid}/Reservations
+    print (request.json['taskSid'])
+    taskSid = request.json['taskSid']
+    #taskSid = request.args.get('taskSid')
+
+    client = Client(account_sid, auth_token)
+
+    reservations = client.taskrouter \
+                        .workspaces(workspace_sid) \
+                        .tasks(taskSid) \
+                        .reservations \
+                        .list(limit=20)
+
+    data = {}
+    for record in reservations:
+
+        #print (dir(record))
+        #print(record.sid)
+        if (record.reservation_status in ('accepted')):
+            print (record.worker_sid)
+            #print (record.reservation_status)
+            data.update({'workerSid':record.worker_sid})
+            #no need to continue 
+            break
+
+    resp = Response(json.dumps({'success':True, "payload":data}), status=200, mimetype='application/json')
+    return resp
+
 @app.route("/accept_reservation", methods=['GET', 'POST'])
 def accept_reservation():
     """Accepting a Reservation"""
@@ -76,6 +108,72 @@ def accept_reservation():
 
     resp = Response(json.dumps({'success':True}), status=200, mimetype='application/json')
     return resp
+
+
+@app.route("/get_worker_details", methods=['GET', 'POST'])
+def get_worker_details():
+    """ get worker details """
+    #https://www.twilio.com/docs/taskrouter/api/worker#fetch-a-worker-resource
+    #https://taskrouter.twilio.com/v1/Workspaces/{WorkspaceSid}/Workers/{Sid}
+
+    print (request.json['workerSid'])
+    workerSid = request.json['workerSid']
+    #taskSid = request.args.get('taskSid')
+
+    client = Client(account_sid, auth_token)
+
+    worker = client.taskrouter \
+                .workspaces(workspace_sid) \
+                .workers(workerSid) \
+                .fetch()
+
+    #print (worker.__dict__)
+    #print(worker.activity_name)
+    print (worker.friendly_name)
+    
+    print ('----------------------------------')
+    #convert to dict
+    #print (json.loads(worker.attributes))
+    data = {"friendly_name":worker.friendly_name}
+    #flatlining it to make it easier on the javascript side
+    data.update(json.loads(worker.attributes))
+
+
+    resp = Response(json.dumps({'success':True, "payload":data}), status=200, mimetype='application/json')
+    return resp
+
+@app.route("/get_worker_stats", methods=['GET', 'POST'])
+def get_worker_stats():
+    """ get worker details """
+    #https://www.twilio.com/docs/taskrouter/api/worker#fetch-a-worker-resource
+    #https://taskrouter.twilio.com/v1/Workspaces/{WorkspaceSid}/Workers/{Sid}
+
+    print (request.json['workerSid'])
+    workerSid = request.json['workerSid']
+    #taskSid = request.args.get('taskSid')
+
+    client = Client(account_sid, auth_token)
+
+    worker = client.taskrouter \
+                .workspaces(workspace_sid) \
+                .workers(workerSid) \
+                .fetch()
+
+    #print (worker.__dict__)
+    #print(worker.activity_name)
+    print (worker.friendly_name)
+    
+    print ('----------------------------------')
+    #convert to dict
+    #print (json.loads(worker.attributes))
+    data = {"friendly_name":worker.friendly_name}
+    #flatlining it to make it easier on the javascript side
+    data.update(json.loads(worker.attributes))
+
+
+    resp = Response(json.dumps({'success':True, "payload":data}), status=200, mimetype='application/json')
+    return resp
+
 
 from flask import make_response
 
@@ -110,7 +208,7 @@ def generate_view():
     return r
 
 #from twilio.jwt.taskrouter.capabilities import TaskQueueCapabilityToken
-from twilio.jwt.taskrouter.capabilities import WorkspaceCapabilityToken
+from twilio.jwt.taskrouter.capabilities import WorkspaceCapabilityToken, TaskQueueCapabilityToken
 
 @app.route("/student_create_task", methods=['GET', 'POST'])
 #@cross_origin(origin='*')
@@ -118,6 +216,14 @@ def generate_view2():
     name = request.args.get('name')
     level = request.args.get('level')
     language = request.args.get('language')
+
+    taskQ = TaskQueueCapabilityToken(account_sid=account_sid, auth_token=auth_token, workspace_sid=workspace_sid, task_queue_sid=task_queue_sid)
+    taskQ.allow_fetch_subresources()
+    taskQ.allow_update_subresources()
+    taskQ_token = taskQ.to_jwt().decode('utf-8')
+    print ('**********************************')
+    print (taskQ_token)
+    print ('**********************************')
     '''
     #worker_capability = WorkerCapabilityToken(account_sid, auth_token, workspace_sid, worker_sid)
     worker_capability = TaskQueueCapabilityToken(account_sid, auth_token, workspace_sid, task_queue_sid)   
@@ -136,24 +242,20 @@ def generate_view2():
     worker_capability.allow_fetch_self()
     '''
     #worker_capability = WorkerCapabilityToken(account_sid, auth_token, workspace_sid, worker_sid)
-    worker_capability = WorkspaceCapabilityToken(account_sid=account_sid, auth_token=auth_token, workspace_sid=workspace_sid)    
-    
-    
-    
-    worker_capability.allow_fetch_subresources()
-    
-    
-    worker_capability.allow_fetch_subresources()
-    worker_capability.allow_update_subresources()
-    worker_capability.allow_delete_subresources()
-    worker_capability.allow_web_sockets()
-    worker_capability.allow_fetch_self()
+    #used to retrieve task assignment stats
+    task_capability = WorkspaceCapabilityToken(account_sid=account_sid, auth_token=auth_token, workspace_sid=workspace_sid)    
+    task_capability.allow_fetch_subresources()
+    task_capability.allow_fetch_subresources()
+    task_capability.allow_update_subresources()
+    task_capability.allow_delete_subresources()
+    task_capability.allow_web_sockets()
+    task_capability.allow_fetch_self()
 
-    worker_token = worker_capability.to_jwt().decode('utf-8')
+    task_token = task_capability.to_jwt().decode('utf-8')
 
     #return render_template('agent.html', worker_token=worker_token)
 
-    r = make_response(render_template('student.html', worker_token=worker_token, name=name, level=level, language=language))
+    r = make_response(render_template('student.html', task_token=task_token, name=name, level=level, language=language, taskQ_token=taskQ_token))
     r.headers.set('Access-Control-Allow-Origin', "*'")
    
     return r

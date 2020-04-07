@@ -2,12 +2,14 @@
 <html>
 <head>
     <title>Customer Care - Voice Agent Screen</title>
-    <link rel="stylesheet" href="//media.twiliocdn.com/taskrouter/quickstart/agent.css"/>
+    <!--<link rel="stylesheet" href="//media.twiliocdn.com/taskrouter/quickstart/agent.css"/>-->
     <script src="//media.twiliocdn.com/taskrouter/js/v1.14/taskrouter.min.js"></script>
     <!--<script src="//SK44117cae0af7e1b95ba5f25e9d36d60b:AFOHa42tZRiNmSVeaE7dxotxjmv0AJc6@media.twiliocdn.com/taskrouter/js/v1.14/taskrouter.min.js"></script>-->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script type="text/javascript">
-        var initialTaskSid;
+        var initialTaskSid, workerSid;
+        var taskAssignmentStatus;
+        var meh;
         window.onload = function() {
             videoclick("zoom", "https://berlitz-latam.zoom.us/j/5786229231");
             videoclick("newrow", "https://smart.newrow.com/#/room/gmn-082");
@@ -16,9 +18,12 @@
             //sessionStorage.clear();
             // Initialize TaskRouter.js on page load using window.workerToken -
             // a Twilio Capability token that was set from rendering the template with agents endpoint
-            logger("Initializing...");
+            //logger("Initializing...");
             //window.worker = new Twilio.TaskRouter.Worker("{{ worker_token }}");
-            window.worker = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
+            window.task_worker = new Twilio.TaskRouter.Workspace("{{ task_token }}");
+            
+            window.taskQueue = new Twilio.TaskRouter.TaskQueue("{{taskQ_token}}");
+            
             //window.workspace = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
             //try to get the task that the current worker has - this is done incase of page refresh
             //or some issues to force cancel/complete previous task
@@ -39,12 +44,20 @@
                     initialTaskSid = response.payload.taskSid;
                     // Store
                     sessionStorage.setItem("taskSid", initialTaskSid);
-
-                    //display video sections 
-                    start_lesson_button = document.getElementById('videosection');
+/*
+                    //hide current 
+                    start_lesson_button = document.getElementById('videoseagent-activity Busyction');
                     console.log('should be hiding the start lesson button now')
+                    start_lesson_button.style.display = "none";
+                    
+                    //display finding instructor section 
+                    start_lesson_button = document.getElementById('finding_instructor');
+                    console.log('displaying finding now')
                     start_lesson_button.style.display = "block";   
+                    console.log('check task activity')
+*/
 
+                    hide_stuff('student_task', 'finding_instructor')                    
                     checkTaskActivity(initialTaskSid);
 
                 },
@@ -60,57 +73,102 @@
             console.log('are we in storage: ' + sessionStorage.getItem("taskSid"))
                 if (sessionStorage.getItem("taskSid")){
                     console.log('should be running')
-                    var meh = checkTaskActivity
-                    setInterval(meh, 5000)
+                    meh = checkTaskActivity
+                    mehID = setInterval(meh, 5000)
                 }
             
                 //setInterval(function(){ console.log("Hello"); }, 5000);
-            /*
-            // Initialize TaskRouter.js on page load using window.workerToken -
-            // a Twilio Capability token that was set from rendering the template with agents endpoint
-            logger("Initializing...");
-            window.worker = new Twilio.TaskRouter.Worker("{{ worker_token }}");
-            //window.workspace = new Twilio.TaskRouter.Workspace("{{ worker_token }}");
-            //try to get the task that the current worker has - this is done incase of page refresh
-            //or some issues to force cancel/complete previous task
-            current_worker_sid = "{{current_worker_sid}}";
-            console.log(window.worker);
-            console.log(current_worker_sid)
-            console.log('above');
-            var queryParams = {"ReservationStatus":"accepted", "WorkerSid":current_worker_sid};
-            worker.fetchReservations(
-                function(error, reservations) {
+
+            $(".mask").addClass("active");
+                    // Call the closeModal function on the clicks/keyboard
+            $(".close").on("click", function(){
+                console.log('being clicked');
+                //prevent modal from closing for now
+            // closeModal();
+            });
+
+            //used to get taskqueue stats
+            var queryParams = {"Minutes":"240"}; // 4 hours
+            taskQueue.cumulativeStats.fetch(
+                queryParams,
+                function(error, statistics) {
                     if(error) {
                         console.log(error.code);
                         console.log(error.message);
                         return;
                     }
-                    console.log(reservations)
-                    var data = reservations.data;
-                    for(i=0; i<data.length; i++) {
-                        console.log(data[i].sid);
+                    console.log("fetched taskQueue statistics: "+JSON.stringify(statistics));
+                    console.log("avg task acceptance time: "+statistics.avgTaskAcceptanceTime);
+                }
+            );
+
+            //hide the join button by default
+            taskQueue.realtimeStats.fetch(
+                function(error, statistics) {
+                    if(error) {
+                        console.log(error.code);
+                        console.log(error.message);
+                        return;
+                    }
+                    console.log("fetched taskQueue statistics: "+JSON.stringify(statistics));
+                    console.log("total available workers: "+statistics.totalAvailableWorkers);
+                    console.log("total eligible workers: "+statistics.totalEligibleWorkers);
+                    console.log("total eligible workers: "+JSON.stringify(statistics.activityStatistics));
+
+                    taskQ_activity = statistics.activityStatistics
+                    var arrayLength = taskQ_activity.length;
+                    console.log(arrayLength)
+                    //get workers by stats
+                    for (var i = 0; i < arrayLength; i++) {
+                        console.log(taskQ_activity[i]);
+                        //console.log(myStringArray[i].friendlyName);
+                        // busy + '_stat'
+                        stat_friendlyName = taskQ_activity[i].friendlyName.concat("_taskQStat")
+                        // time is in seconds for /60
+                        window[stat_friendlyName] = taskQ_activity[i].workers
+
+                        console.log(stat_friendlyName)
+                        //Do something
+                    }
+                    console.log(Busy_taskQStat)
+                    
+                    if(statistics.totalAvailableWorkers > 0 || Busy_taskQStat > 0){
+                        //workers are available
+
+
+                        //workers are busy, so can queue tasks
+                        // ct
+                    }else{
                         
                     }
-                    console.log('ggggggggggggggggggggggg')
-                    console.log(data)
-                    try{
-                        currentReservedTask = reservations.data[0].taskSid
-                        currentTaskAttr = reservations.data[0].task.attributes
-                        document.getElementById("student_level").innerHTML = currentTaskAttr.level ;
-                        document.getElementById("student_language").innerHTML = currentTaskAttr.language ;
-                        document.getElementById("student_name").innerHTML = currentTaskAttr.name ;
-                    }catch (error) {
-                        console.log('no existing tasks')
-                    }
-                    
-                    console.log(currentReservedTask)
-                    worker.com
-                    complete_task(worker, currentReservedTask);
-                },
-                queryParams
+                }
             );
-            */
+
+
         };
+
+
+
+        function hide_stuff(toHide, toShow){
+            //hide current 
+            hide = document.getElementById(toHide);
+            console.log('should be hiding the start lesson button now')
+            hide.style.display = "none";
+            
+            //display finding instructor section 
+            show = document.getElementById(toShow);
+            console.log('displaying finding now')
+            show.style.display = "block";   
+            console.log('check task activity')
+        }
+
+
+        function display_finding_instructor(){
+            start_lesson_button = document.getElementById('videosection');
+            console.log('should be hiding the start lesson button now')
+            start_lesson_button.style.display = "block";  
+        }
+
         function logger(message) {
             var log = document.getElementById('log');
             log.value += "\n> " + message;
@@ -154,19 +212,46 @@
             );
             */
             console.log(initialTaskSid)
+            console.log('status of current task is: ' + taskAssignmentStatus)
             checkTaskSid =  sessionStorage.getItem("taskSid");
-            if(checkTaskSid){
-                worker.tasks.fetch(checkTaskSid,
+            console.log(checkTaskSid)
+            if(checkTaskSid || taskAssignmentStatus != 'assigned' || taskAssignmentStatus != 'completed'){
+                task_worker.tasks.fetch(checkTaskSid,
                     function(error, task) {
                         if(error) {
                             //task doesnot exist in Twilio, so remove from our storage
-                            sessionStorage.clear();
+                            //removed for now - the clear is not working as expected
+                            //sessionStorage.clear();
+
+                            //stop checking for task status
+                            clearInterval(mehID)
                             console.log(error.code);
                             console.log(error.message);
                             return;
                         }
                         console.log(JSON.stringify(task.attributes));
                         console.log(task)
+                        taskAssignmentStatus = task.assignmentStatus
+                        // need to add something in for completed to clear the storage
+                        if(taskAssignmentStatus == 'assigned' || taskAssignmentStatus == 'completed'){
+                            console.log(taskAssignmentStatus)
+                            if(taskAssignmentStatus == 'completed'){
+                                //doesnt seem to work properly yet
+                                console.log('cccccccccccccccccccccccccccccc')
+                                //completed no longer need to track
+                                sessionStorage.clear();
+
+                                //return to original modal
+                                hide_stuff('videosection', 'student_task')
+                            }
+                            getReservationDetails(checkTaskSid);
+                        }else{
+                            console.log('only instructor should be shown+++++++++++++++++++++++++++++++++++++++++++++++++')
+                            hide_stuff('student_task', 'finding_instructor')          
+                            //ensure that interval is set to run
+                            meh = checkTaskActivity;
+                            mehID = setInterval(meh, 5000);
+                        }
 
                         //when assigned to reserved/pending then need to run 370 from agent.html to get worker details -- fuck
                     }
@@ -177,11 +262,77 @@
 
 
         }
+
+        function getReservationDetails(checkTaskSid){
+            data = {"taskSid":checkTaskSid}
+            $.ajax({
+                url: '/check_reservation',
+                data: JSON.stringify(data),
+                contentType: 'application/json;charset=UTF-8',
+                type: 'POST',
+                success: function(response) {
+                    console.log(response);
+                    console.log(response.payload.workerSid)
+                    workerSid = response.payload.workerSid;
+
+                    console.log('did the polling stoppppppppppppppppppppppppppppppppppppppp')
+                    //task has been assigned, so no need to continue intervalling
+                    //need to check why this is not stopping
+                    clearInterval(mehID);
+                    console.log('interval should of stopped')
+                    //console.log(meh)
+                    getWorkerDetails(workerSid)
+                },
+                    error: function(error) {
+                        console.log(error);
+                }
+            });
+        }
+
+        function getWorkerDetails(workerSid){
+            data = {"workerSid":workerSid}
+            $.ajax({
+                url: '/get_worker_details',
+                data: JSON.stringify(data),
+                contentType: 'application/json;charset=UTF-8',
+                type: 'POST',
+                success: function(response) {
+                    console.log(response);
+                    console.log(response.payload)
+                    console.log(response.payload.friendly_name)
+                    console.log(response.payload.about)
+                    console.log(response.payload.bio_pic)
+                    workerDetails = response.payload;
+                    document.getElementById("instructor_pic").src = response.payload.bio_pic;
+                    document.getElementById("instructor_pic").alt = response.payload.friendly_name;
+                    // insertHtmlById('name', response.payload.friendly_name)
+                    insertHtmlById('instructor_bio', response.payload.about)
+                    hide_stuff('student_task', 'videosection') 
+                    hide_stuff('finding_instructor', 'videosection') 
+                     
+
+                    //not sure why this doesnt work
+                    clearInterval(mehID);
+                    console.log(window)
+                },
+                    error: function(error) {
+                        console.log(error);
+                }
+            });
+        }        
+
+        function insertHtmlById(id, value){
+            console.log(id)
+            console.log(value)
+            document.getElementById(id).innerHTML = value
+
+        }
+
         function videoclick(classId, videolink){
             console.log("try to set video buttons");
             //turn button on
             video_button = document.getElementById(classId);
-            console.log(video_button)
+            //console.log(video_button)
             video_button.style.display = "inline-block";
             video_button.onclick = function(){
                 console.log('button has been clicked, time to open video link to:');
@@ -191,9 +342,46 @@
             }            
         }
             
+        // Click function for show the Modal
+
+        $(".show").on("click", function(){
+            $(".mask").addClass("active");
+        });
+
+        // Function for close the Modal
+
+        function closeModal(){
+            $(".mask").removeClass("active");
+        }
+
+        // Call the closeModal function on the clicks/keyboard
+        $(".close").on("click", function(){
+            console.log('being clicked')
+            closeModal();
+        });
+
+        $(".close, .mask").on("click", function(){
+            console.log('being clicked')
+            closeModal();
+        });
+
+        $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+            closeModal();
+        }
+        });
+
      </script>
     <style type="text/css" media="screen">
-        html{background-color: #E5EDFD;}
+
+        html{
+            background-color: #E5EDFD;
+            background: url(https://router-prototype.s3.eu-central-1.amazonaws.com/images/student_page.png)  no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: contain;
+            }
 
         html * { 
             
@@ -201,9 +389,22 @@
             color: #1D1D1D !important;
             font-family: 'IBM Plex Mono', monospace !important;
         }
-        .video, .start-zoom, .start-newrow, .start-agora {display:none;}
+        .finding_instructor, .video, .start-zoom, .start-newrow, .start-agora {display:none;}
         
-        
+        .bgimg-1 {
+            background-image: url(//router-prototype.s3.eu-central-1.amazonaws.com/images/student_page-min.png);
+            height: 100%;
+        }
+
+        .bgimg-1, .bgimg-2, .bgimg-3 {
+            position: relative;
+            opacity: 0.65;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+
+
         section.header {
             line-height: 3 !important;
             background-color: #FEFEFE;
@@ -211,143 +412,254 @@
             text-align: center;
         }
 
-        .header-image{
-            height:90%;
-            float: left;
-        }
+        /* // Show Button */
 
-        /* The Modal (background) */
-        .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-
-        /* Modal Content/Box */
-        .modal-content {
-        background-color: #643BA2;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%; /* Could be more or less, depending on screen size */
-        }
-
-        /* The Close Button */
-        .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-        color: black;
-        text-decoration: none;
+        .show{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 150px;
+        height: 40px;
+        margin-top: -20px;
+        margin-left: -75px;
+        background: #e74c3c;
+        color: #fff;
+        border-radius: 5px;
+        border: 0;
+        border-bottom: 2px solid #c0392b;
         cursor: pointer;
-        }        
         
+        &:hover{
+            background: #c0392b;
+        }
+        
+        &:active{
+            transform: scale(0.9);
+        }
+        }
+
+        // Close Button
+
+        .close{
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 35px;
+        height: 30px;
+        background: #000;
+        color: #fff;
+        cursor: pointer;
+        border: 0;
+        }
+
+        /* // The mask */
+
+        .mask{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(52, 73, 94, 0.8);
+        z-index: 50;
+        visibility: hidden;
+        
+        opacity: 0;
+        
+        transition: 0.7s;
+        }
+
+        /* // Modal */
+
+        .modal{
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: auto;
+        min-width: 500px;
+        height: 300px;
+        margin-left: -30%;
+        margin-top: -150px;
+        background: #FEFEFE;
+        z-index: 100;
+        visibility: hidden;
+        
+        opacity: 0;
+        
+        transition: 0.5s ease-out;
+        
+        transform: translateY(45px);
+        }
+
+        /* // Class Active */
+
+        .active{
+        visibility: visible;
+        opacity: 1;
+        }
+
+        /* // When active class is added, that affects the modal class */
+
+        .active + .modal{
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+        }
+
+         .sk-chase {
+        
+        width: 40px;
+        height: 40px;
+        position: relative;
+        animation: sk-chase 2.5s infinite linear both;
+        margin:auto;
+        margin-top: 100px !important;
+        }
+
+        .sk-chase-dot {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0; 
+        animation: sk-chase-dot 2.0s infinite ease-in-out both; 
+        }
+
+        .sk-chase-dot:before {
+        content: '';
+        display: block;
+        width: 25%;
+        height: 25%;
+        background-color: #643BA2;
+        border-radius: 100%;
+        animation: sk-chase-dot-before 2.0s infinite ease-in-out both; 
+        }
+
+        .sk-chase-dot:nth-child(1) { animation-delay: -1.1s; }
+        .sk-chase-dot:nth-child(2) { animation-delay: -1.0s; }
+        .sk-chase-dot:nth-child(3) { animation-delay: -0.9s; }
+        .sk-chase-dot:nth-child(4) { animation-delay: -0.8s; }
+        .sk-chase-dot:nth-child(5) { animation-delay: -0.7s; }
+        .sk-chase-dot:nth-child(6) { animation-delay: -0.6s; }
+        .sk-chase-dot:nth-child(1):before { animation-delay: -1.1s; }
+        .sk-chase-dot:nth-child(2):before { animation-delay: -1.0s; }
+        .sk-chase-dot:nth-child(3):before { animation-delay: -0.9s; }
+        .sk-chase-dot:nth-child(4):before { animation-delay: -0.8s; }
+        .sk-chase-dot:nth-child(5):before { animation-delay: -0.7s; }
+        .sk-chase-dot:nth-child(6):before { animation-delay: -0.6s; }
+
+        @keyframes sk-chase {
+        100% { transform: rotate(360deg); } 
+        }
+
+        @keyframes sk-chase-dot {
+        80%, 100% { transform: rotate(360deg); } 
+        }
+
+        @keyframes sk-chase-dot-before {
+        50% {
+            transform: scale(0.4); 
+        } 100%, 0% {
+            transform: scale(1.0); 
+        } 
+        }
+
+        button {
+            background: #643BA2;
+            color:#E5EDFD !important;
+            height: auto;
+            font-weight: bold;
+            
+            
+        }
+        div h1, div h3 {
+            background: #643BA2;
+            margin:0;
+        }
+        h1, h3 {
+            color:#FEFEFE;
+            padding: 10px;
+            width: calc(100% - 20px);
+            color: #E5EDFD !important;
+        }
+        .trigger_info{
+            float:right;
+            /* padding-top: calc(100% - 20px); */
+            padding-right: 10px;
+        }
+        h1{
+            font-size: large !important;
+        }
+        h3 {
+            font-size: x-small !important;
+        }
+        .lesson_info{
+            padding: 10px;
+            /* float:left; */
+        }
+        instructor_details{
+            padding:10px;
+        }
+        .instructor_details img{
+            border-radius: 50%;
+            width:150px;
+            height:150px;
+            float:left;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
     </style>     
 </head>
 <body>
-<section class="header"  style="">
-    <p class="header" style="height:50px">
-        <img src ="//router-prototype.s3.eu-central-1.amazonaws.com/images/berlitz_logo.jpg.jpg" alt=" Berlitz" class="header-image" >
-        <span>Lesson Router</span>    
-</p>
-</section>     
-<div class="content">
-    <section class="agent-activity Available"  style="line-height: 1 !important;">
-        <p class="activity">Current Online, </br> waiting for students</p>
-        <button class="change-activity" data-next-activity="Offline">Go Offline</button>
+<div class="mask" role="dialog"></div>   
+<div class="modal">
+    <div class="loader"></div>
+    <section class="agent-activity Busy"  id="student_task" style="line-height: 1 !important;">
+        <div id="create_task" class="">
+            <h3>Email 3-4 | A2.2 - A2.3<button class="close" style="float:right;"role="button">X</button></h3>
+            <h1> Time to perform your new found skills with a Berlitz instructor</h1>
+            <div class="lesson_info">
+                <p class="activity"><span>Connect with a Berlitz Instructor</span></p>
+                <p>lesson: <span id="student_level">{{level}}</span> - <span id="student_language">{{language}}</span></p>
+                <p  style="float:left">Student Name: <span id="student_name">{{name}}</span></p>
+            </div>
+            <div class="trigger_info">
+                <button id="ct" class="accept-reservation" data-next-activity="Available">Join a session Now!</button>
+            </div>
+        </div>
     </section>
-    <section class="agent-activity Offline">
-        <p class="activity"><span>Currently Offline</span></p>
-        <button class="change-activity" data-next-activity="Available">Go Online</button>
+    <section class="finding_instructor" id="finding_instructor">
+        <h1>Finding your instructor now !!</h1>
+        <div class="sk-chase">
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+          </div> 
     </section>
-    <section class="agent-activity Busy"  style="line-height: 1 !important; display:block !important;">
-        <p class="activity"><span>Connect with a Berlitz Instructor</span></p>
-        <p>lesson: <span id="student_level">{{level}}</span> - <span id="student_language">{{language}}</span></p>
-        <p>Student Name: <span id="student_name">{{name}}</span></p>
-        <!--<button class="change-activity" data-next-activity="Busy">Start Lesson</button>-->
-        <button id="ct" class="accept-reservation" data-next-activity="Available">Join a session Now</button>
-        <!--<button id="dafuq" class="complete-task" data-next-activity="Available">Lesson Completed</button>-->
-        <section class="video" id="videosection">
-            <p>Choose a video provider</p>
-            <button id="zoom" class="start-zoom" data-next-activity="Busy">Start Zoom</button>
-            <button id="newrow" class="start-newrow" data-next-activity="Busy">Start Newrow</button>
-            <button id="agora" class="start-newrow" data-next-activity="Busy">Start Agora</button>
-        </section>        
-    </section>
+
+    <section class="video" id="videosection">
+        <h1>Instructor Match!</h1>
+        <div class="instructor_details">
+            <img id="instructor_pic" src="https://router-prototype.s3.eu-central-1.amazonaws.com/images/img_avatar_default.png" alt="Avatar">
+            <p><span id="instructor_bio"></span></p>
+        </div>
+        <p>Choose a video provider</p>
+        <button id="zoom" class="start-zoom" data-next-activity="Busy">Start Zoom</button>
+        <button id="newrow" class="start-newrow" data-next-activity="Busy">Start Newrow</button>
+        <button id="agora" class="start-newrow" data-next-activity="Busy">Start Agora</button>
+    </section>    
+
     
-    <section class="agent-activity reserved">
-        <p class="activity">Reserved</p>
-    </section>
-    <section class="agent-activity busy">
-        <p class="activity">Busy</p>
-    </section>
-    <section class="agent-activity wrapup">
-        <p class="activity">Wrap-Up</p>
-        <button class="change-activity" data-next-activity="Available">Go Online</button>
-        <button class="change-activity" data-next-activity="Offline">Go Offline</button>
-    </section>
+<!--
     <section class="log">
       <textarea id="log" readonly="true"></textarea>
     </section>
-</div>
-<!--
-
-<button id="myBtn">Open Modal</button>
-
-
-<div id="myModal" class="modal">
-
-
-  <div class="modal-content">
-      <h3>join with a berlitz instructor now</h3>
-    <span class="close">&times;</span>
-    <p>Some text in the Modal..</p>
-  </div>
-
-</div>
-<script>
-        
-        //modal stuff
-        // Get the modal
-        var modal = document.getElementById("myModal");
-
-        // Get the button that opens the modal
-        var btn = document.getElementById("myBtn");
-
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
-
-        // When the user clicks on the button, open the modal
-        btn.onclick = function() {
-        modal.style.display = "block";
-        }
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-        modal.style.display = "none";
-        }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-        }        
-
-
-</script>
 -->
+
+</div>
+
 </body>
 </html>

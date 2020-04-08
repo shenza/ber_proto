@@ -520,6 +520,8 @@ worker.updateTask(reservation.taskSid, params,
                     console.log('~~~~~~~~~~~~~~~~~~~~')
                     console.log(stt.reservationsCompleted)
                     window['reservationsCompleted'] = stt.reservationsCompleted
+                    window['reservationsTimedOut'] = stt.reservationsTimedOut
+                    
                     console.log(statistics.cumulative.activityDurations)
                     myStringArray = statistics.cumulative.activityDurations
                     var arrayLength = myStringArray.length;
@@ -537,6 +539,8 @@ worker.updateTask(reservation.taskSid, params,
                     console.log(Busy_stat)
                     insertHtmlById('reservationsCompleted',reservationsCompleted)
                     insertHtmlById('Busy_stat',Busy_stat)
+                    insertHtmlById('reservationsTimedOut',reservationsTimedOut)
+                    
                     
                     
                 }
@@ -689,6 +693,7 @@ worker.updateTask(reservation.taskSid, params,
         <section id="show_stats" class="agent-stats   style="line-height: 1 !important;">
             <p class="stats_p">Lessons Today: <span id="reservationsCompleted" class="stats_b">0</span></p>
             <p class="stats_p">Average Duration: <span id="Busy_stat" class="stats_g">0</span> min</p>
+            <p class="stats_p">Missed Lessons: <span id="reservationsTimedOut" class="stats_g">0</span></p>
             <p class="stats_p">Average Rating: <span class="stats_g">4.5</span></p>   
         </section>
     </div>

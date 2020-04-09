@@ -31,7 +31,13 @@
                 console.log(worker)
                 console.log(currentReservations)
                 console.log(initialWorkerActivity)
-                if(!currentReservations.data[0] && worker.activityName == "Busy"){
+                var reservat = null;
+                try {
+                    reservat = currentReservations.data[0]
+                } catch (error) {
+                    console.log('reservations does not exist: '+ error)
+                }
+                if(reservat  !== null && worker.activityName == "Busy"){
                     worker.update({"ActivitySid":activity_Offline})
                     //start lesson button is hidden, reshow
                     start_lesson_button = document.getElementById('accept_res');
@@ -152,8 +158,9 @@ worker.updateTask(reservation.taskSid, params,
                 //set the agora url to the students detail
                 new_agora_url = new URL(window.location.protocol + '//' + window.location.host + '/video')
                 new_agora_url.searchParams.append('student', reservation.task.attributes.name);
-                lesson = reservation.task.attributes.level + ' - ' + reservation.task.attributes.language
-                new_agora_url.searchParams.append('lesson', lesson);
+                lesson = reservation.task.attributes.level + ' - ' + reservation.task.attributes.language;
+            
+                new_agora_url.searchParams.append('lesson', encodeURIComponent(lesson));
                 new_agora_url.searchParams.append('channel', reservation.task.attributes.channel);
                 new_agora_url.searchParams.append('instructor', worker.friendlyName);
                 videoclick("agora", new_agora_url);
@@ -251,6 +258,24 @@ worker.updateTask(reservation.taskSid, params,
         function resetvideoclick(){
 
         }
+
+        function set_agora_url(reservation){
+            console.log('the function is generating this link ')
+            //set the agora url to the students detail
+            console.log(reservation)
+            
+            new_agora_url = new URL(window.location.protocol + '//' + window.location.host + '/video')
+            new_agora_url.searchParams.append('student', reservation.task.attributes.name);
+            
+            lesson = reservation.task.attributes.level + ' - ' + reservation.task.attributes.language;
+            new_agora_url.searchParams.append('lesson', encodeURIComponent(lesson));
+            console.log(lesson)
+            console.log(encodeURIComponent(lesson))
+            new_agora_url.searchParams.append('channel', reservation.task.attributes.channel);
+            new_agora_url.searchParams.append('instructor', worker.friendlyName);
+            videoclick("agora", new_agora_url);
+        }
+
 
         function complete_task(worker, currentReservedTask){
             logger("time to complete" + currentReservedTask)
@@ -371,6 +396,14 @@ worker.updateTask(reservation.taskSid, params,
         function showAgentActivity(activity) {
             //activity = activity.toLowerCase();
             console.log(activity)
+            //user starts lesson this button is hidden, 
+            // then refreshes page, process goes buggy and this button is never
+            // set to be shown again
+            if (activity === 'Available'){
+                start_lesson_button = document.getElementById('accept_res');
+                console.log('should be showing the start lesson button now')
+                start_lesson_button.style.display = "inline-block";
+            }
             var elements = document.getElementsByClassName(('agent-activity ' + activity));
             console.log(elements);
             elements.item(0).style.display = 'block';
@@ -435,9 +468,15 @@ worker.updateTask(reservation.taskSid, params,
                     console.log(data)
                     console.log(reservations.data[0])
                     console.log('there appears to be a ressssss')
+                        // console.log(reservations.data[0].task.attributes)
+                        // console.log(reservations.reservationStatus );
+                        console.log('wtffffffffffffffffffffffffffffffff')
+
+                    
 
                     try{
-                        if(reservations.reservationStatus == "accepted"){
+                        if(reservations.data[0].reservationStatus === "accepted"){
+                        //if(reservations.reservationStatus === "accepted"){
                             currentReservedTask = reservations.data[0].taskSid
                             currentTaskAttr = reservations.data[0].task.attributes
                             document.getElementById("student_level").innerHTML = currentTaskAttr.level ;
@@ -456,8 +495,35 @@ worker.updateTask(reservation.taskSid, params,
                             start_lesson_button = document.getElementById('videosection');
                             console.log('should be hiding the start lesson button now')
                             start_lesson_button.style.display = "block"; 
+                            console.log('______________________________________')
+                            set_agora_url(reservations.data[0]);
+                        }else if(reservations.reservationStatus === "accepted"){
+                            console.log('??????????????????????????????????????? ever scomer here ?')
+                            currentReservedTask = reservations.data[0].taskSid
+                            currentTaskAttr = reservations.data[0].task.attributes
+                            document.getElementById("student_level").innerHTML = currentTaskAttr.level ;
+                            document.getElementById("student_language").innerHTML = currentTaskAttr.language ;
+                            document.getElementById("student_name").innerHTML = currentTaskAttr.name ;
+                            //found a reservation attached to the worker - update status to busy
+                            agentActivityChanged('Busy');
+                            
+                            worker.update({"ActivitySid":activity_Busy});
+                            //disable the start button
+                            start_lesson_button = document.getElementById('accept_res');
+                            console.log('should be hiding the start lesson button now')
+                            start_lesson_button.style.display = "none";
+
+                            //display video sections 
+                            start_lesson_button = document.getElementById('videosection');
+                            console.log('should be hiding the start lesson button now')
+                            start_lesson_button.style.display = "block"; 
+                            console.log('______________________________________')
+                            set_agora_url(reservations.data[0])
                         }
+                        
+                        console.log('***************************')
                     }catch (error) {
+                        console.log(error)
                         console.log('no existing tasks')
                     }
 
@@ -489,8 +555,8 @@ worker.updateTask(reservation.taskSid, params,
         };
 
         function insertHtmlById(id, value){
-            console.log(id)
-            console.log(value)
+            // console.log(id)
+            // console.log(value)
             document.getElementById(id).innerHTML = value
 
         }
@@ -509,10 +575,10 @@ worker.updateTask(reservation.taskSid, params,
             //console.log(d.toISOString());
             
             dateNow.setHours(0,0,0,0);
-            console.log(dateNow)
+            // console.log(dateNow)
             startDate = dateNow.toISOString()
-            console.log(startDate)
-            console.log(endDate);
+            // console.log(startDate)
+            // console.log(endDate);
             var queryParams = {"Minutes":"240"};
             var queryParams = {"StartDate":"2020-03-30T20:00:00-07:00", "EndDate":"2020-04-03T17:00:00-07:00"};
             var queryParams = {"StartDate":startDate, "EndDate":endDate};
@@ -524,20 +590,20 @@ worker.updateTask(reservation.taskSid, params,
                         console.log(error.message);
                         return;
                     }
-                    console.log("fetched worker statistics: "+JSON.stringify(statistics));
-                    console.log(statistics)
+                    // console.log("fetched worker statistics: "+JSON.stringify(statistics));
+                    // console.log(statistics)
                     //console.log(statistics.realtime)
                     stt = statistics.cumulative;
-                    console.log(stt)
-                    console.log('~~~~~~~~~~~~~~~~~~~~')
-                    console.log(stt.reservationsCompleted)
+                    // console.log(stt)
+                    // console.log('~~~~~~~~~~~~~~~~~~~~')
+                    // console.log(stt.reservationsCompleted)
                     window['reservationsCompleted'] = stt.reservationsCompleted
                     window['reservationsTimedOut'] = stt.reservationsTimedOut
                     
-                    console.log(statistics.cumulative.activityDurations)
+                    // console.log(statistics.cumulative.activityDurations)
                     myStringArray = statistics.cumulative.activityDurations
                     var arrayLength = myStringArray.length;
-                    console.log(arrayLength)
+                    // console.log(arrayLength)
                     for (var i = 0; i < arrayLength; i++) {
                         //console.log(myStringArray[i]);
                         //console.log(myStringArray[i].friendlyName);
@@ -548,7 +614,7 @@ worker.updateTask(reservation.taskSid, params,
                         //console.log(stat_friendlyName)
                         //Do something
                     }
-                    console.log(Busy_stat)
+                    // console.log(Busy_stat)
                     insertHtmlById('reservationsCompleted',reservationsCompleted)
                     insertHtmlById('Busy_stat',Busy_stat)
                     insertHtmlById('reservationsTimedOut',reservationsTimedOut)

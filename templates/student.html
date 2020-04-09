@@ -327,7 +327,7 @@
                     new_agora_url = new URL(window.location.protocol + '//' + window.location.host + '/video')
                     new_agora_url.searchParams.append('student', '{{name}}');
                     lesson = '{{level}} - {{language}}'
-                    new_agora_url.searchParams.append('lesson', lesson);
+                    new_agora_url.searchParams.append('lesson', encodeURIComponent(lesson));
                     new_agora_url.searchParams.append('channel', '{{channel}}');
                     new_agora_url.searchParams.append('instructor', response.payload.friendly_name);
                     insertHtmlById('instructor_bio', response.payload.about)

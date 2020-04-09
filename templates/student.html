@@ -264,7 +264,7 @@
                             console.log('this is inside the function checktask' + mehID)
                             if (!mehID){
                                 
-                                mehID = setInterval(meh, 5000);
+                                mehID = setInterval(meh, 2000);
                                 console.log('couldnt find interval for the client, so time to redo it '+ mehID)
                             }
                              
@@ -323,10 +323,19 @@
                     document.getElementById("instructor_pic").src = response.payload.bio_pic;
                     document.getElementById("instructor_pic").alt = response.payload.friendly_name;
                     // insertHtmlById('name', response.payload.friendly_name)
+                    //rebuild agora url e.g. /video?student=krish&lesson=studying%20in%20english%20level&channel=ggg&instructor=%20marky%20mark
+                    new_agora_url = new URL(window.location.protocol + '//' + window.location.host + window.location.pathname)
+                    new_agora_url.searchParams.append('student', '{{name}}');
+                    lesson = '{{level}} - ' + ' {{language}}'
+                    new_agora_url.searchParams.append('lesson', lesson);
+                    new_agora_url.searchParams.append('channel', '{{channel}}');
+                    new_agora_url.searchParams.append('instructor', response.payload.friendly_name);
                     insertHtmlById('instructor_bio', response.payload.about)
                     hide_stuff('student_task', 'videosection') 
                     hide_stuff('finding_instructor', 'videosection') 
                      
+                    console.log(new_agora_url.href);
+                    videoclick("agora", new_agora_url);
 
                     if(mehID){
                         //not sure why this doesnt work
@@ -635,6 +644,44 @@
         .small {
             font-size: x-small !important;
         }
+        /* // Modal */
+
+        .modal-2{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: auto;
+            min-width: 500px;
+            max-width: 70%;
+            height: 300px;
+            margin-left: -30%;
+            margin-top: -150px;
+            background: #FEFEFE;
+            z-index: 100;
+            visibility: hidden;
+            
+            opacity: 0;
+            
+            transition: 0.5s ease-out;
+            
+            transform: translateY(45px);
+        }
+
+        /* // Class Active */
+
+        .active{
+        visibility: visible;
+        opacity: 1;
+        }
+
+        /* // When active class is added, that affects the modal class */
+
+        .active + .modal-2{
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+        }
+
 
     </style>     
 </head>

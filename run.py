@@ -216,6 +216,7 @@ def generate_view2():
     name = request.args.get('name')
     level = request.args.get('level')
     language = request.args.get('language')
+    channel = request.args.get('channel')
 
     taskQ = TaskQueueCapabilityToken(account_sid=account_sid, auth_token=auth_token, workspace_sid=workspace_sid, task_queue_sid=task_queue_sid)
     taskQ.allow_fetch_subresources()
@@ -273,7 +274,7 @@ def generate_view2():
 
     #return render_template('agent.html', worker_token=worker_token)
 
-    r = make_response(render_template('student.html', task_token=task_token, name=name, level=level, language=language, taskQ_token=taskQ_token))
+    r = make_response(render_template('student.html', task_token=task_token, name=name, level=level, language=language, channel=channel, taskQ_token=taskQ_token))
     r.headers.set('Access-Control-Allow-Origin', "*'")
    
     return r
@@ -297,6 +298,13 @@ def generate_agor():
    
     return r
 
+@app.route("/video", methods=['GET', 'POST'])
+#@cross_origin(origin='*')
+def generate_video():
+    r = make_response(render_template('meeting.html'))
+    r.headers.set('Access-Control-Allow-Origin', "*'")
+   
+    return r
 
 if __name__ == "__main__":
     #logging.getLogger('flask_cors').level = logging.DEBUG

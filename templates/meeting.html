@@ -1,0 +1,34 @@
+<!doctype html> 
+<html lang=en>
+   <head>
+      <meta charset=utf-8>
+      <meta http-equiv=cache-control content="max-age=0">
+      <meta name=viewport content="width=device-width,initial-scale=1">
+      <link rel="shortcut icon" href=assets/favicon.ico>
+      <title>Berlitz Video</title>
+      <script>function getUrlVars(){var o={};window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(n,t,e){o[t]=e});return o}function getUrlParam(n,t){var e=t;return-1<window.location.href.indexOf(n)&&(e=getUrlVars()[n]),decodeURI(e)}function insertHtmlById(n,t){console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"),console.log(n),console.log(t),console.log("***************************************"),document.getElementById(n).innerHTML=t}window.onload=function(){var n=getUrlParam("student",""),t=getUrlParam("lesson",""),e=getUrlParam("instructor","");insertHtmlById("student",n),insertHtmlById("lesson",t),insertHtmlById("instructor",e)}</script> 
+      <style type=text/css media=screen>#page-meeting .ag-header-logo{width:auto!important}</style>
+      <link href="https://router-prototype.s3.eu-central-1.amazonaws.com/assets/css/vendor.css" rel="stylesheet">
+      <link href="https://router-prototype.s3.eu-central-1.amazonaws.com/assets/css/meeting.css" rel="stylesheet">
+   </head>
+   <body>
+      <div class=wrapper id=page-meeting>
+         <div class=ag-header>
+            <div class=ag-header-lead> <img class=ag-header-logo src="data:image/png;base64,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" alt=""> </div>
+            <div class=ag-header-msg style=float:right>Lesson: <span id=lesson></span> </div>
+            <div class=ag-header-msg> Room:&nbsp; <span id=room-name>--</span> </div>
+         </div>
+         <div class=ag-main>
+            <div class=ag-container id=ag-canvas>
+               <div class=ag-btn-group> <span class="ag-btn exitBtn" title=Exit> <i class="ag-icon icon-call-ends"></i> </span> <span class="ag-btn videoControlBtn" title="Enable/Disable Video"> <i class="ag-icon icon-camera"></i> <i class="ag-icon icon-camera-off"></i> </span> <span class="ag-btn audioControlBtn" title="Enable/Disable Audio"> <i class="ag-icon icon-mic"></i> <i class="ag-icon icon-mic-off"></i> </span> <span class="ag-btn shareScreenBtn" title="Share Screen"> <i class="ag-icon icon-screen-share"></i> </span> <span class="ag-btn displayModeBtn" title="Switch Display Mode"> <i class="ag-icon icon-switch-layout"></i> </span> </div>
+            </div>
+         </div>
+         <div class=ag-footer>
+            <div class=ag-header-msg style=float:right>Sudent Name: <span id=student></span> </div>
+            <div class=ag-header-msg style=float:right>Instructor Name: <span id=instructor></span> </div>
+         </div>
+      </div>
+      <script type="text/javascript" src="https://router-prototype.s3.eu-central-1.amazonaws.com/assets/js/vendor.09e6093.js"></script>
+      <script type="text/javascript" src="https://router-prototype.s3.eu-central-1.amazonaws.com/assets/js/meeting.90aaa42.js"></script>
+   </body>
+</html>

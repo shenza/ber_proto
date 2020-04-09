@@ -34,7 +34,7 @@
 
             document.getElementById('ct').onclick = function(){
                 if(! sessionStorage.getItem("taskSid") ){
-                data = {"name":"{{name}}", "level":"{{level}}", "language":"{{language}}", "uuid":"2345443"}
+                data = {"name":"{{name}}", "level":"{{level}}", "language":"{{language}}", "uuid":"2345443", "channel":"{{channel}}"}
                 console.log('task has been completed');
                 $.ajax({
                 url: '/create_task',
@@ -324,9 +324,9 @@
                     document.getElementById("instructor_pic").alt = response.payload.friendly_name;
                     // insertHtmlById('name', response.payload.friendly_name)
                     //rebuild agora url e.g. /video?student=krish&lesson=studying%20in%20english%20level&channel=ggg&instructor=%20marky%20mark
-                    new_agora_url = new URL(window.location.protocol + '//' + window.location.host + window.location.pathname)
+                    new_agora_url = new URL(window.location.protocol + '//' + window.location.host + '/video')
                     new_agora_url.searchParams.append('student', '{{name}}');
-                    lesson = '{{level}} - ' + ' {{language}}'
+                    lesson = '{{level}} - {{language}}'
                     new_agora_url.searchParams.append('lesson', lesson);
                     new_agora_url.searchParams.append('channel', '{{channel}}');
                     new_agora_url.searchParams.append('instructor', response.payload.friendly_name);

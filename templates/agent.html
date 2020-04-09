@@ -39,8 +39,9 @@
                     start_lesson_button.style.display = "none";
 
                 }else{
+                    console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                     start_lesson_button = document.getElementById('accept_res');
-                        console.log('should be hiding the start lesson button now')
+                        console.log('should be showing the start lesson button now')
                         start_lesson_button.style.display = "inline-block";
                 }
 
@@ -147,7 +148,15 @@ worker.updateTask(reservation.taskSid, params,
                 logger("Reservation " + reservation.sid + " accepted!");
                 agentActivityChanged('Busy');
                 worker.update({"ActivitySid":activity_Busy});
-                
+
+                //set the agora url to the students detail
+                new_agora_url = new URL(window.location.protocol + '//' + window.location.host + '/video')
+                new_agora_url.searchParams.append('student', reservation.task.attributes.name);
+                lesson = reservation.task.attributes.level + ' - ' + reservation.task.attributes.language
+                new_agora_url.searchParams.append('lesson', lesson);
+                new_agora_url.searchParams.append('channel', reservation.task.attributes.channel);
+                new_agora_url.searchParams.append('instructor', worker.friendlyName);
+                videoclick("agora", new_agora_url);
             });
 
             worker.on("reservation.rejected", function(reservation) {
@@ -276,6 +285,9 @@ worker.updateTask(reservation.taskSid, params,
                                 return;
                             }
                             console.log("Completed Task: "+completedTask.assignmentStatus);
+
+                            //reset agora link back to instructor link
+                            videoclick("agora", worker.attributes.agora);
                             agentActivityChanged('wrapup');
                         }
                     );

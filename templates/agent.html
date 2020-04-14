@@ -44,11 +44,21 @@
                     console.log('should be hiding the start lesson button now')
                     start_lesson_button.style.display = "none";
 
+                    //display complete lesson button 
+                    start_lesson_button = document.getElementById('dafuq');
+                    console.log('should be displaying the video now')
+                    start_lesson_button.style.display = "inline-block";      
+
                 }else{
                     console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                     start_lesson_button = document.getElementById('accept_res');
-                        console.log('should be showing the start lesson button now')
-                        start_lesson_button.style.display = "inline-block";
+                    console.log('should be showing the start lesson button now')
+                    start_lesson_button.style.display = "inline-block";
+
+                    //display complete lesson button 
+                    start_lesson_button = document.getElementById('dafuq');
+                    console.log('should be displaying the video now')
+                    start_lesson_button.style.display = "none";      
                 }
 
 
@@ -314,6 +324,10 @@ worker.updateTask(reservation.taskSid, params,
                             //reset agora link back to instructor link
                             videoclick("agora", worker.attributes.agora);
                             agentActivityChanged('wrapup');
+                            //hide complete lesson button 
+                            start_lesson_button = document.getElementById('dafuq');
+                            console.log('should be displaying the video now')
+                            start_lesson_button.style.display = "none";      
                         }
                     );
                 }
@@ -357,8 +371,15 @@ worker.updateTask(reservation.taskSid, params,
 
                         //display video sections 
                         start_lesson_button = document.getElementById('videosection');
-                        console.log('should be hiding the start lesson button now')
+                        console.log('should be displaying the video now')
                         start_lesson_button.style.display = "block";                       
+
+                        //display complete lesson button 
+                        start_lesson_button = document.getElementById('dafuq');
+                        console.log('should be displaying the video now')
+                        start_lesson_button.style.display = "inline-block";                       
+
+
                     },
                     error: function(error) {
                         console.log(error);
@@ -491,6 +512,11 @@ worker.updateTask(reservation.taskSid, params,
                             console.log('should be hiding the start lesson button now')
                             start_lesson_button.style.display = "none";
 
+                            //display complete lesson button 
+                            start_lesson_button = document.getElementById('dafuq');
+                            console.log('should be displaying the video now')
+                            start_lesson_button.style.display = "inline-block";      
+
                             //display video sections 
                             start_lesson_button = document.getElementById('videosection');
                             console.log('should be hiding the start lesson button now')
@@ -512,6 +538,11 @@ worker.updateTask(reservation.taskSid, params,
                             start_lesson_button = document.getElementById('accept_res');
                             console.log('should be hiding the start lesson button now')
                             start_lesson_button.style.display = "none";
+
+                            //display complete lesson button 
+                            start_lesson_button = document.getElementById('dafuq');
+                            console.log('should be displaying the video now')
+                            start_lesson_button.style.display = "inline-block";      
 
                             //display video sections 
                             start_lesson_button = document.getElementById('videosection');
@@ -711,6 +742,10 @@ worker.updateTask(reservation.taskSid, params,
             padding: 5px;
         }
 
+        #dafuq{
+            display:none;
+        }
+
     </style>
 </head>
 <body>
@@ -746,7 +781,9 @@ worker.updateTask(reservation.taskSid, params,
             <p>Student: <span id="student_name"></span></p>
             <!--<button class="change-activity" data-next-activity="Busy">Start Lesson</button>-->
             <button id="accept_res" class="accept-reservation" data-next-activity="Busy">Start Lesson</button>
-            <button id="dafuq" class="complete-task" data-next-activity="Available">Complete Lesson</button>
+            <div style="text-align:center"> 
+                <button id="dafuq" class="complete-task" data-next-activity="Available">Complete Lesson</button>
+            </div>
             <section class="video" id="videosection">
                 <p>Choose a video provider</p>
                 <button id="zoom" class="start-zoom" data-next-activity="Busy">Start Zoom</button>

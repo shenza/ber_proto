@@ -58,7 +58,12 @@
                     //display complete lesson button 
                     start_lesson_button = document.getElementById('dafuq');
                     console.log('should be displaying the video now')
-                    start_lesson_button.style.display = "none";      
+                    start_lesson_button.style.display = "none";     
+
+                    //hide video sections 
+                    start_lesson_button = document.getElementById('videosection');
+                    console.log('should be displaying the video now')
+                    start_lesson_button.style.display = "none";    
                 }
 
 
@@ -139,21 +144,18 @@
                 //console.log(document.getElementsByClassName("agent-activity Available"));
                 //document.getElementsByClassName("agent-activity Available").style.display = "none";
                 document.getElementById("available_1").style.display = "none";
-                /*
-                //this stuff works
-                var params = {"Priority":"15"};
-                logger(reservation.taskSid);
-worker.updateTask(reservation.taskSid, params,
-    function(error, updatedTask) {
-        if(error) {
-            console.log(error.code);
-            console.log(error.message);
-            return;
-        }
-        console.log("Updated Task Priority: "+updatedTask.priority);
-    }
-);
-        */
+
+
+                //make sure that these are hidden
+                //hide complete lesson button 
+                start_lesson_button = document.getElementById('dafuq');
+                console.log('should be hiding the video now')
+                start_lesson_button.style.display = "none";      
+
+                //hide video sections 
+                start_lesson_button = document.getElementById('videosection');
+                console.log('should be hiding the video now')
+                start_lesson_button.style.display = "none";
 
             });
 
@@ -326,8 +328,13 @@ worker.updateTask(reservation.taskSid, params,
                             agentActivityChanged('wrapup');
                             //hide complete lesson button 
                             start_lesson_button = document.getElementById('dafuq');
-                            console.log('should be displaying the video now')
+                            console.log('should be hiding the video now')
                             start_lesson_button.style.display = "none";      
+
+                            //hide video sections 
+                            start_lesson_button = document.getElementById('videosection');
+                            console.log('should be hiding the video now')
+                            start_lesson_button.style.display = "none";   
                         }
                     );
                 }
